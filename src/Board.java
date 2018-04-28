@@ -151,8 +151,7 @@ public class Board {
       exchange(arr, 0,1,1,0);
     }
 
-    Board board = new Board(arr);
-    return board;
+    return new Board(arr);
   }
 
   // does this board equal y?

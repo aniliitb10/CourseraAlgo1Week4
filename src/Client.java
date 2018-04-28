@@ -12,15 +12,15 @@ public class Client
       for (int j = 0; j < n; j++)
         blocks[i][j] = in.readInt();
     Board board = new Board(blocks);
-    System.out.println(board);
-    System.out.println("hamming: " + board.hamming() + ", manhattan: " + board.manhattan());
-    System.out.println("A twin:\n" + board.twin());
-
-    System.out.println("Following are the neighbours:\n");
-    for (Board b : board.neighbors())
-    {
-      System.out.println(b);
-    }
+//    System.out.println(board);
+//    System.out.println("hamming: " + board.hamming() + ", manhattan: " + board.manhattan());
+//    System.out.println("A twin:\n" + board.twin());
+//
+//    System.out.println("Following are the neighbours:\n");
+//    for (Board b : board.neighbors())
+//    {
+//      System.out.println(b);
+//    }
 
     // solve the puzzle
     Solver solver = new Solver(board);
@@ -31,8 +31,8 @@ public class Client
     else
     {
       StdOut.println("Minimum number of moves = " + solver.moves());
-      for (Board solutionBoard : solver.solution())
-        StdOut.println(solutionBoard);
+//      for (Board solutionBoard : solver.solution())
+//        StdOut.println(solutionBoard);
 
     }
   }

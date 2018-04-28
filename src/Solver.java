@@ -6,6 +6,8 @@ import java.util.Iterator;
 public class Solver
 {
   private MinPQ<SearchNode> _minPq = new MinPQ<>();
+  private boolean _solvable;
+  private SearchNode finalSearchNode = null;
   private ArrayList<Board> _solutions = new ArrayList<>();
 
   private class SolutionIterator implements Iterable<Board>
@@ -25,32 +27,20 @@ public class Solver
 
   private class SearchNode implements Comparable<SearchNode>
   {
-    private Board _board;
-    private int   _numOfMovesMade;
-    private Board _predecessorBoard;
+    Board _board;
+    int   _numOfMovesMade;
+    SearchNode _preSearchNode;
 
-    SearchNode(Board board_, int numOfMovesMade_, Board predecessorBoard_)
+    SearchNode(Board board_)
+    {
+      this(board_, 0, null);
+    }
+
+    SearchNode(Board board_, int numOfMovesMade_, SearchNode preSearchNode_)
     {
       _board = board_;
       _numOfMovesMade = numOfMovesMade_;
-      _predecessorBoard = predecessorBoard_;
-    }
-
-    public int getNumOfMovesMade()
-    {
-      return _numOfMovesMade;
-    }
-
-    public ArrayList<SearchNode> getAllNeighbourSearchNode()
-    {
-      ArrayList<SearchNode> allNeighbours = new ArrayList<>();
-      for (Board board : _board.neighbors())
-      {
-        if (board.equals(this._predecessorBoard)) continue;
-        allNeighbours.add(new SearchNode(board, (_numOfMovesMade + 1), this._board));
-      }
-
-      return allNeighbours;
+      _preSearchNode = preSearchNode_;
     }
 
     public int priority()
@@ -68,39 +58,76 @@ public class Solver
     @Override
     public int compareTo(SearchNode that)
     {
-      return this.priority() - that.priority();
+      return Integer.compare(this.priority(), that.priority());
     }
   }
 
   // find a solution to the initial board (using the A* algorithm)
   public Solver(Board initial)
   {
-    SearchNode searchNode = new SearchNode(initial, 0, null);
-    _minPq.insert(searchNode);
+    Board initialTwin = initial.twin();
+    SearchNode inSearchNode = new SearchNode(initial, 0, null);
+    SearchNode inSearchNodeTwin = new SearchNode(initialTwin, 0, null);
+
+    MinPQ<SearchNode> minPQTwin = new MinPQ<>();
+    _minPq.insert(inSearchNode);
+    minPQTwin.insert(inSearchNodeTwin);
+
     SearchNode minSearchNode = _minPq.delMin();
-    _solutions.add(minSearchNode.getBoard());
-    while(!minSearchNode.isGoal())
+    SearchNode minSearchNodeTwin = minPQTwin.delMin();
+
+    while((!minSearchNode.isGoal()) && (!minSearchNodeTwin.isGoal()))
     {
-      for (SearchNode neighbourSearchNode : minSearchNode.getAllNeighbourSearchNode())
+//      _minPq = new MinPQ<>();
+      for (Board board : minSearchNode.getBoard().neighbors())
       {
-        _minPq.insert(neighbourSearchNode);
+        if ((minSearchNode._preSearchNode == null) || (!board.equals(minSearchNode._preSearchNode._board)))
+        {
+          SearchNode sn = new SearchNode(board);
+          sn._preSearchNode = minSearchNode;
+          sn._numOfMovesMade = minSearchNode._numOfMovesMade + 1;
+          _minPq.insert(sn);
+        }
+      }
+
+//      minPQTwin = new MinPQ<>();
+      for (Board board : minSearchNodeTwin.getBoard().neighbors())
+      {
+        if ((minSearchNodeTwin._preSearchNode == null) || (!board.equals(minSearchNodeTwin._preSearchNode._board)))
+        {
+          SearchNode snt = new SearchNode(board);
+          snt._preSearchNode = minSearchNodeTwin;
+          snt._numOfMovesMade = minSearchNodeTwin._numOfMovesMade + 1;
+          minPQTwin.insert(snt);
+        }
       }
 
       minSearchNode = _minPq.delMin();
-      _solutions.add(minSearchNode.getBoard());
+      minSearchNodeTwin = minPQTwin.delMin();
+    }
+
+    if (minSearchNode.isGoal())
+    {
+      _solvable = true;
+      finalSearchNode = minSearchNode;
+
+      for (SearchNode s = minSearchNode; s != null; s = minSearchNode._preSearchNode)
+      {
+        _solutions.add(s._board);
+      }
     }
   }
 
   // is the initial board solvable?+
   public boolean isSolvable()
   {
-    return true; // need to fix this
+    return _solvable;
   }
 
   // min number of moves to solve initial board; -1 if unsolvable
   public int moves()
   {
-    return (_solutions.size() - 1);
+    return (this.isSolvable() ? (_solutions.size() - 1) : -1);
   }
 
   // sequence of boards in a shortest solution; null if unsolvable
