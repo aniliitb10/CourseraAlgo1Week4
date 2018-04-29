@@ -50,7 +50,7 @@ public class Board {
         createAndAppendNewBoard(blocks_, (_zRow - 1), _zCol, _zRow, _zCol);
       }
       // exchange with lower block
-      if(_zRow < (dimension() - 1))
+      if(_zRow < (_dimension - 1))
       {
         createAndAppendNewBoard(blocks_, (_zRow + 1), _zCol, _zRow, _zCol);
       }
@@ -60,7 +60,7 @@ public class Board {
         createAndAppendNewBoard(blocks_, _zRow, (_zCol - 1), _zRow, _zCol);
       }
       // right block
-      if (_zCol < (dimension() - 1))
+      if (_zCol < (_dimension - 1))
       {
         createAndAppendNewBoard(blocks_, _zRow, (_zCol + 1), _zRow, _zCol);
       }
@@ -95,7 +95,7 @@ public class Board {
       throw new java.lang.IllegalArgumentException("null argument");
     }
 
-    _blocks = blocks_;
+    _blocks = deepCopy2DArray(blocks_);
 
     // determining _hamming and _manhattan during construction
     for (int row = 0; row < dimension(); ++row)
@@ -133,7 +133,7 @@ public class Board {
     arr_[row1_][col1_] = arr_[row2_][col2_];
     arr_[row2_][col2_] = tmp;
   }
-  
+
   // a board that is obtained by exchanging any pair of blocks
   public Board twin()
   {
@@ -164,7 +164,7 @@ public class Board {
     Board that = (Board)y;
 
     if ((that.dimension() != this.dimension()) || (that.manhattan() != this.manhattan()) ||
-        (that.hamming() != this.hamming()))
+      (that.hamming() != this.hamming()))
     {
       return false;
     }
@@ -191,19 +191,19 @@ public class Board {
   // string representation of this board (in the output format specified below)
   public String toString()
   {
-      StringBuilder sb = new StringBuilder();
-      sb.append(this.dimension() + "\n");
+    StringBuilder sb = new StringBuilder();
+    sb.append(this.dimension() + "\n");
 
-      for (int row = 0; row < dimension(); ++row)
+    for (int row = 0; row < dimension(); ++row)
+    {
+      for (int col = 0; col < dimension(); ++col)
       {
-        for (int col = 0; col < dimension(); ++col)
-        {
-          sb.append(" " + _blocks[row][col]);
-        }
-        sb.append("\n");
+        sb.append(" " + _blocks[row][col]);
       }
+      sb.append("\n");
+    }
 
-      return sb.toString();
+    return sb.toString();
   }
 
   // unit tests (not graded)
